@@ -484,7 +484,7 @@ document.getElementById("orderForm").addEventListener("submit", async function(e
     console.warn("Google Sheets connection error:",err);
   }
 
-  // Show "Processing your order..." for 1 second, then go to Thank You page.
+  // Show "Processing your order..." for 2 seconds, then go to Thank You page.
   setTimeout(()=>{
     document.getElementById("orderModal").classList.remove("show");
     document.body.style.overflow="";
@@ -515,7 +515,7 @@ document.getElementById("orderForm").addEventListener("submit", async function(e
 
     document.getElementById("thankYouPage").style.display="block";
     window.scrollTo({top:0,behavior:"smooth"});
-  },1000);
+  }, 2000);
 });
 
 function continueShopping(){
