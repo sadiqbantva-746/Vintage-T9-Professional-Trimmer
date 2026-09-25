@@ -372,6 +372,13 @@ h1{font-size:clamp(34px,5vw,60px);line-height:1.03;margin:15px 0}
 <img alt="Customer shared photo" id="lightboxImg" src=""/>
 </div>
 <script>
+/* ================= GOOGLE SHEETS ORDER CONNECTION =================
+   After deploying the Apps Script as a Web App, paste its /exec URL here.
+   Example: https://script.google.com/macros/s/XXXXXXXX/exec
+================================================================== */
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3EN1p_qznLX25Wmb_6bUgiXTslDDvPTz2bIeo4MBgQPME38--TmaNFZDcOkp076-o/exec";
+</script>
+<script>
 function changeMainPhoto(src, alt){
   const main=document.getElementById("mainProductPhoto");
   if(main){ main.src=src; if(alt) main.alt=alt; }
@@ -403,7 +410,7 @@ function updateSummary(){
 }
 function safe(v){ return v && v.trim() ? v.trim() : "—"; }
 
-document.getElementById("orderForm").addEventListener("submit", function(e){
+document.getElementById("orderForm").addEventListener("submit", async function(e){
   e.preventDefault();
 
   const name=safe(document.getElementById("name").value);
@@ -417,8 +424,47 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
   const total=productTotal+DELIVERY;
   const orderNo="VT9-"+Date.now().toString().slice(-7);
 
+  const orderData={
+    orderNo,
+    product:"Vintage T9 Professional Trimmer",
+    name,
+    phone,
+    address,
+    city,
+    landmark,
+    quantity:qty,
+    productPrice:PRODUCT_PRICE,
+    productTotal,
+    delivery:DELIVERY,
+    total,
+    note,
+    paymentMethod:"Cash on Delivery"
+  };
+
   document.getElementById("orderForm").style.display="none";
   document.getElementById("loading").style.display="block";
+
+  /* Send order to Google Sheets.
+     no-cors is used because Apps Script is on a different domain.
+     The order is still written to the sheet by the Apps Script. */
+  let sheetSent = false;
+  try{
+    if(
+      GOOGLE_SCRIPT_URL &&
+      GOOGLE_SCRIPT_URL.indexOf("PASTE_YOUR_") !== 0
+    ){
+      await fetch(GOOGLE_SCRIPT_URL,{
+        method:"POST",
+        mode:"no-cors",
+        headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify(orderData),
+        keepalive:true
+      });
+      sheetSent = true;
+    }
+  }catch(err){
+    console.warn("Google Sheets connection error:",err);
+  }
 
   // Show "Processing your order..." for 1 second, then go to Thank You page.
   setTimeout(()=>{
