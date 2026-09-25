@@ -465,20 +465,20 @@ document.getElementById("orderForm").addEventListener("submit", async function(e
   /* Send order to Google Sheets.
      no-cors is used because Apps Script is on a different domain.
      The order is still written to the sheet by the Apps Script. */
-  let sheetSent = false;
+  // Send to Google Sheets without blocking the Processing → Thank You timer.
+  // The customer experience is not delayed by Apps Script/network response time.
   try{
     if(
       GOOGLE_SCRIPT_URL &&
       GOOGLE_SCRIPT_URL.indexOf("PASTE_YOUR_") !== 0
     ){
-      await fetch(GOOGLE_SCRIPT_URL,{
+      fetch(GOOGLE_SCRIPT_URL,{
         method:"POST",
         mode:"no-cors",
         headers:{"Content-Type":"text/plain;charset=utf-8"},
         body:JSON.stringify(orderData),
         keepalive:true
-      });
-      sheetSent = true;
+      }).catch(err => console.warn("Google Sheets connection error:",err));
     }
   }catch(err){
     console.warn("Google Sheets connection error:",err);
